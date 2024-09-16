@@ -2,7 +2,7 @@ import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import cors from "cors";
-import authenticateToken from "./middleware.js";
+import z from "zod";
 
 import User from "./db.js";
 
@@ -11,26 +11,59 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+const signupInput = z.object({
+  email: z.string().email(),
+  password: z.string(),
+  name: z.string(),
+});
+
 app.post("/api/auth/signup", async (req, res) => {
+  const body = req.body;
+
+  const { success } = signupInput.safeParse(body);
+  if (!success) {
+    return res.status(411).json({
+      msg: "Inputs are incorrect",
+    });
+  }
   try {
-    const { name, username, password } = req.body;
-    const existingUser = await User.findOne({ username });
+    const { name, email, password } = body;
+    console.log(name, email, password);
+    const existingUser = await User.findOne({ email });
+    console.log(existingUser);
     if (existingUser) {
-      return res.status(400).json({ message: "Username already exists" });
+      return res.status(400).json({ message: "Email already exists" });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ name, username, password: hashedPassword });
+    const user = new User({
+      name: name,
+      email: email,
+      password: hashedPassword,
+    });
     await user.save();
     res.status(201).json({ message: "User created successfully" });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: "Error creating user" });
   }
 });
 
+const signinInput = z.object({
+  email: z.string().email(),
+  password: z.string(),
+  name: z.string().optional(),
+});
 app.post("/api/auth/signin", async (req, res) => {
+  const body = req.body;
+  const { success } = signinInput.safeParse(body);
+  if (!success) {
+    return res.status(411).json({
+      msg: "Inputs are incorrect",
+    });
+  }
   try {
-    const { username, password } = req.body;
-    const user = await User.findOne({ username });
+    const { email, password } = body;
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
@@ -47,17 +80,37 @@ app.post("/api/auth/signin", async (req, res) => {
   }
 });
 
-app.get("/api/user", authenticateToken, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.userId).select("-password");
-    res.json(user);
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching user data" });
-  }
+const forgetPasswordInput = z.object({
+  email: z.string().email(),
+  newPassword: z.string().min(6),
 });
 
-app.post("/api/auth/signout", (req, res) => {
-  res.json({ message: "Signed out successfully" });
+app.post("/api/auth/forget-password", async (req, res) => {
+  const body = req.body;
+  const { success } = forgetPasswordInput.safeParse(body);
+  if (!success) {
+    return res.status(411).json({
+      msg: "Inputs are incorrect",
+    });
+  }
+
+  try {
+    const { email, newPassword } = body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res
+        .status(400)
+        .json({ message: "User with this email does not exist" });
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    user.password = hashedPassword;
+    await user.save();
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating password" });
+  }
 });
 
 const PORT = process.env.PORT || 5000;
