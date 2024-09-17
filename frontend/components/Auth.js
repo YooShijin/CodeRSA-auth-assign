@@ -9,7 +9,8 @@ import { useRouter } from "next/navigation";
 import ForgetPasswordModal from "./ForgotPasswordMode";
 useRouter;
 
-const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:5000";
+const BACKEND_URL =
+  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
 export const Auth = ({ type }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -44,7 +45,7 @@ export const Auth = ({ type }) => {
       toast.error("Error while signing up");
     }
   }
-
+  console.log(BACKEND_URL);
   return (
     <div className=" flex justify-center flex-col">
       <div className="flex justify-center">

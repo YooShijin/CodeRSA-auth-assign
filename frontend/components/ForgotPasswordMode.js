@@ -6,7 +6,8 @@ const ForgetPasswordModal = ({ isOpen, onClose }) => {
   const [email, setEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
-  const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:5000";
+  const BACKEND_URL =
+    process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
