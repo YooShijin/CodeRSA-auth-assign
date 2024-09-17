@@ -45,7 +45,6 @@ export const Auth = ({ type }) => {
       toast.error("Error while signing up");
     }
   }
-  console.log(BACKEND_URL);
   return (
     <div className=" flex justify-center flex-col">
       <div className="flex justify-center">
