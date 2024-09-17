@@ -1,10 +1,10 @@
 import { useState } from "react";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 const ForgetPasswordModal = ({ isOpen, onClose }) => {
   const [email, setEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [message, setMessage] = useState("");
 
   const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:5000";
   const handleSubmit = async (e) => {
@@ -14,9 +14,13 @@ const ForgetPasswordModal = ({ isOpen, onClose }) => {
         `${BACKEND_URL}/api/auth/forget-password`,
         { email, newPassword }
       );
-      setMessage("Password updated successfully!");
+      toast.success("Password updated successfully!");
+      setEmail("");
+      setNewPassword("");
     } catch (error) {
-      setMessage("Error updating password. Please try again.");
+      toast.error("Error updating password. Please try again.");
+      setEmail("");
+      setNewPassword("");
     }
   };
 
@@ -63,7 +67,6 @@ const ForgetPasswordModal = ({ isOpen, onClose }) => {
             Submit
           </button>
         </form>
-        {message && <p className="mt-4 text-center">{message}</p>}
         <button
           onClick={onClose}
           className="mt-4 w-full text-center text-gray-500 hover:underline"

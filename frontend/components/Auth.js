@@ -30,8 +30,10 @@ export const Auth = ({ type }) => {
       );
 
       if (type == "signup") {
+        toast.success("Account created successfully!");
         router.push("/signin");
       } else {
+        toast.success("Logged in Successfully!");
         console.log(response);
         const jwt = response.data.token;
         localStorage.setItem("token", jwt);
@@ -46,7 +48,7 @@ export const Auth = ({ type }) => {
   return (
     <div className=" flex justify-center flex-col">
       <div className="flex justify-center">
-        <div>
+        <form>
           <div className="text-4xl font-extrabold pb-2">
             {type === "signin" ? "SIGN IN" : "SIGN UP"} FORM
             <br />
@@ -75,6 +77,7 @@ export const Auth = ({ type }) => {
             />
           ) : null}
           <LabelledInput
+            type="email"
             label="Email"
             placeholder="email"
             onChange={(e) => {
@@ -86,7 +89,7 @@ export const Auth = ({ type }) => {
           />
           <LabelledInput
             label="Password"
-            type={"password"}
+            type="password"
             placeholder="password"
             onChange={(e) => {
               setPostInputs({
@@ -98,7 +101,7 @@ export const Auth = ({ type }) => {
           {type === "signup" ? (
             <LabelledInput
               label="ConfPassword"
-              type={"password"}
+              type="password"
               placeholder="confirm password"
               onChange={(e) => {
                 setConfPassword(e.target.value);
@@ -112,21 +115,23 @@ export const Auth = ({ type }) => {
               </button>
             </div>
           ) : null}
-          <ForgetPasswordModal isOpen={isModalOpen} onClose={closeModal} />
+
           <button
             onClick={() => {
               if (type === "signup" && confPassword != postInputs.password) {
                 alert("Passwords do not match");
+                setConfPassword("");
                 return;
               }
               sendRequest();
             }}
-            type="button"
+            type="submit"
             className="mt-6 w-full text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700"
           >
             {type === "signup" ? "Sign Up" : "Sign In"}
           </button>
-        </div>
+        </form>
+        <ForgetPasswordModal isOpen={isModalOpen} onClose={closeModal} />
       </div>
     </div>
   );
